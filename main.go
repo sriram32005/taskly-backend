@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/sriram32005/taskly-backend/config"
 	"github.com/sriram32005/taskly-backend/models"
+	"github.com/sriram32005/taskly-backend/handlers"
 )
 
 func main() {
@@ -15,13 +16,19 @@ func main() {
 	if err != nil {
 		panic("Error loading .env file: " + err.Error())
 	}
-
+	
+	r := gin.Default()
+	config.ConnectDB()
+	
 	if err := config.DB.AutoMigrate(&models.User{}); err != nil {
 		log.Panic("Error during auto migration: ", err)
 	}
 
-	r := gin.Default()
-	config.ConnectDB()
+	// Routes
+	r.POST("/register", handlers.Register)
+	r.POST("/login", handlers.Login)
+
+
 	r.Run(":"+os.Getenv("PORT"))
 
 }
