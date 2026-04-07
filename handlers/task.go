@@ -2,10 +2,9 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
-	"taskly/config"
-	"taskly/models"
+	"github.com/sriram32005/taskly-backend/config"
+	"github.com/sriram32005/taskly-backend/models"
 
 	"github.com/gin-gonic/gin"
 )
