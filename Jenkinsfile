@@ -20,6 +20,15 @@ pipeline {
             }
         }
 
+        stage('Load .env from Jenkins Credentials') {
+            steps {
+                withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
+                    sh '''
+                        echo ".env loaded"
+                    '''
+                }
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
@@ -51,9 +60,9 @@ pipeline {
                     docker stop $CONTAINER_NAME || true
                     docker rm $CONTAINER_NAME || true
 
-                    docker run -d \
+                    docker run \
                         --name $CONTAINER_NAME \
-                        --env-file .env \
+                        --env-file $ENV_FILE \
                         -p 8085:8085 \
                         $IMAGE_NAME:$IMAGE_TAG
                 '''

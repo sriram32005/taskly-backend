@@ -15,9 +15,8 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file: " + err.Error())
+	if os.Getenv("ENV") != "production" {
+		godotenv.Load(".env")
 	}
 	
 	r := gin.Default()
