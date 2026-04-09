@@ -20,6 +20,17 @@ pipeline {
             }
         }
 
+        stage('Load .env from Jenkins Credentials') {
+            steps {
+                withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
+                    sh '''
+                        cp $ENV_FILE .env
+                        echo ".env loaded"
+                    '''
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
@@ -44,13 +55,18 @@ pipeline {
             }
         }
 
-        stage('Deploy with Docker Compose') {
+        stage('Deploy Container') {
             steps {
-                sh """
-                docker-compose down || true
-                docker-compose pull
-                docker-compose up -d
-                """
+                sh '''
+                    docker stop $CONTAINER_NAME || true
+                    docker rm $CONTAINER_NAME || true
+
+                    docker run -d \
+                        --name $CONTAINER_NAME \
+                        --env-file .env \
+                        -p 8080:8080 \
+                        $IMAGE_NAME:$IMAGE_TAG
+                '''
             }
         }
     }
