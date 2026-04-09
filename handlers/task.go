@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/sriram32005/taskly-backend/config"
 	"github.com/sriram32005/taskly-backend/models"
@@ -10,7 +11,18 @@ import (
 )
 
 type TaskInput struct {
-	Title string `json:"title" binding:"required"`
+	Title    string  `json:"title" binding:"required"`
+	Priority *string `json:"priority"`  // pointer → detect if provided
+	DueDate  *string `json:"due_date"`  // optional
+}
+
+func isValidPriority(p string) bool {
+	switch p {
+	case "low", "medium", "high":
+		return true
+	default:
+		return false
+	}
 }
 
 func CreateTask(c *gin.Context) {
@@ -23,9 +35,34 @@ func CreateTask(c *gin.Context) {
 
 	userID := c.GetUint("user_id")
 
+	// Default priority
+	priority := "medium"
+
+	// If user provided priority
+	if input.Priority != nil && *input.Priority != "" {
+		if !isValidPriority(*input.Priority) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid priority"})
+			return
+		}
+		priority = *input.Priority
+	}
+
+	// Parse due date (optional)
+	var dueDate *time.Time
+	if input.DueDate != nil && *input.DueDate != "" {
+		t, err := time.Parse(time.RFC3339, *input.DueDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
+			return
+		}
+		dueDate = &t
+	}
+
 	task := models.Task{
-		Title:  input.Title,
-		UserID: userID,
+		Title:    input.Title,
+		Priority: priority,
+		DueDate:  dueDate,
+		UserID:   userID,
 	}
 
 	config.DB.Create(&task)
@@ -54,7 +91,8 @@ func UpdateTask(c *gin.Context) {
 	}
 
 	// Toggle complete OR update title
-	var input map[string]interface{}
+	// var input map[string]interface{}
+	var input models.Task
 	c.ShouldBindJSON(&input)
 
 	config.DB.Model(&task).Updates(input)
