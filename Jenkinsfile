@@ -24,6 +24,9 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
                     sh '''
+                        whoami
+                        pwd
+                        ls -la
                         cat $ENV_FILE > .env
                         echo ".env loaded"
                     '''
