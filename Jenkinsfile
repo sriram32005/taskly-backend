@@ -5,7 +5,7 @@ pipeline {
         IMAGE_NAME = "sriram32005/taskly-backend"
         IMAGE_TAG = "latest"
         CONTAINER_NAME = "taskly-backend"
-        DOCKERHUB_CREDENTIALS = "dockerhub-creds" 
+        DOCKERHUB_CREDENTIALS = "dockerhub-creds"
     }
 
     triggers {
@@ -17,16 +17,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Load .env from Jenkins Credentials') {
-            steps {
-                withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
-                    sh '''
-                        echo ".env loaded"
-                    '''
-                }
             }
         }
 
@@ -56,16 +46,18 @@ pipeline {
 
         stage('Deploy Container') {
             steps {
-                sh '''
-                    docker stop $CONTAINER_NAME || true
-                    docker rm $CONTAINER_NAME || true
+                withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
+                    sh '''
+                        docker stop $CONTAINER_NAME || true
+                        docker rm $CONTAINER_NAME || true
 
-                    docker run \
-                        --name $CONTAINER_NAME \
-                        --env-file $ENV_FILE \
-                        -p 8085:8085 \
-                        $IMAGE_NAME:$IMAGE_TAG
-                '''
+                        docker run -d \
+                            --name $CONTAINER_NAME \
+                            --env-file $ENV_FILE \
+                            -p 8085:8085 \
+                            $IMAGE_NAME:$IMAGE_TAG
+                    '''
+                }
             }
         }
     }
