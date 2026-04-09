@@ -24,7 +24,7 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
                     sh '''
-                        cp $ENV_FILE .env
+                        cat $ENV_FILE > .env
                         echo ".env loaded"
                     '''
                 }
