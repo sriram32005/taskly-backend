@@ -64,7 +64,7 @@ pipeline {
                     docker run -d \
                         --name $CONTAINER_NAME \
                         --env-file .env \
-                        -p 8080:8080 \
+                        -p 8085:8085 \
                         $IMAGE_NAME:$IMAGE_TAG
                 '''
             }
