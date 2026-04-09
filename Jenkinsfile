@@ -20,19 +20,6 @@ pipeline {
             }
         }
 
-        stage('Load .env from Jenkins Credentials') {
-            steps {
-                withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
-                    sh '''
-                        // whoami
-                        // pwd
-                        // ls -la
-                        // cat $ENV_FILE > .env
-                        echo ".env loaded"
-                    '''
-                }
-            }
-        }
 
         stage('Build Docker Image') {
             steps {
