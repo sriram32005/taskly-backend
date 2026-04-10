@@ -68,3 +68,47 @@ func Login(c *gin.Context) {
 		"token": token,
 	})
 }
+
+func APIInfo(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Taskly API usage",
+		"usage": []gin.H{
+			{
+				"endpoint":    "POST /register",
+				"description": "Register a new user",
+				"body":        gin.H{"email": "user@example.com", "password": "secret"},
+			},
+			{
+				"endpoint":    "POST /login",
+				"description": "Authenticate and receive a Bearer token",
+				"body":        gin.H{"email": "user@example.com", "password": "secret"},
+			},
+			{
+				"endpoint":    "GET /endpoint",
+				"description": "Get this API usage information",
+			},
+			{
+				"endpoint":    "POST /tasks",
+				"description": "Create a new task (authenticated)",
+				"headers":     gin.H{"Authorization": "Bearer <token>"},
+				"body":        gin.H{"title": "Buy groceries", "priority": "high", "due_date": "2026-05-01T15:00:00Z"},
+			},
+			{
+				"endpoint":    "GET /tasks",
+				"description": "List tasks for the authenticated user",
+				"headers":     gin.H{"Authorization": "Bearer <token>"},
+			},
+			{
+				"endpoint":    "PUT /tasks/:id",
+				"description": "Update a task by ID (authenticated)",
+				"headers":     gin.H{"Authorization": "Bearer <token>"},
+				"body":        gin.H{"title": "Updated title", "priority": "medium"},
+			},
+			{
+				"endpoint":    "DELETE /tasks/:id",
+				"description": "Delete a task by ID (authenticated)",
+				"headers":     gin.H{"Authorization": "Bearer <token>"},
+			},
+		},
+	})
+}

@@ -1,24 +1,23 @@
 package main
 
 import (
-	"os"
 	"log"
+	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/sriram32005/taskly-backend/config"
-	"github.com/sriram32005/taskly-backend/models"
 	"github.com/sriram32005/taskly-backend/handlers"
 	"github.com/sriram32005/taskly-backend/middleware"
-	"github.com/gin-contrib/cors"
-
+	"github.com/sriram32005/taskly-backend/models"
 )
 
 func main() {
 	if os.Getenv("ENV") != "production" {
 		godotenv.Load(".env")
 	}
-	
+
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
@@ -32,12 +31,13 @@ func main() {
 		AllowCredentials: true,
 	}))
 	config.ConnectDB()
-	
+
 	if err := config.DB.AutoMigrate(&models.User{}, &models.Task{}); err != nil {
 		log.Panic("Error during auto migration: ", err)
 	}
 
 	// Routes
+	r.GET("/", handlers.APIInfo)
 	r.POST("/register", handlers.Register)
 	r.POST("/login", handlers.Login)
 
@@ -50,7 +50,6 @@ func main() {
 		auth.DELETE("/tasks/:id", handlers.DeleteTask)
 	}
 
-
-	r.Run(":"+os.Getenv("PORT"))
+	r.Run(":" + os.Getenv("PORT"))
 
 }
